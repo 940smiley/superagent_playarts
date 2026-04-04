@@ -17,15 +17,15 @@ class BaseService(ABC):
         self.agent_url = os.getenv('AGENT_URL')
         self.bearer_token = os.getenv('BEARER_TOKEN')
         self.model = os.getenv('MODEL_NAME', 'phi4')
-        
+
         self.web3 = Web3(Web3.HTTPProvider(self.rpc_url))
-        
+
     def _get_headers(self) -> Dict[str, str]:
         headers = {"Content-Type": "application/json"}
         if self.bearer_token:
             headers["Authorization"] = f"Bearer {self.bearer_token}"
         return headers
-        
+
     def generate_llm_response(self, prompt: str) -> Optional[str]:
             try:
                 if not self.agent_url:
@@ -56,7 +56,7 @@ class BaseService(ABC):
                 )
 
                 logger.info(f"LLM response status: {response.status_code}")
-                
+
                 if response.status_code != 200:
                     logger.error(f"LLM API error status: {response.status_code}")
                     logger.error(f"LLM API error response: {response.text}")
@@ -73,10 +73,10 @@ class BaseService(ABC):
                 if "response" not in result:
                     logger.error(f"Unexpected response format. Available keys: {list(result.keys())}")
                     return None
-                
+
                 logger.info("Successfully received LLM response")
                 return result.get("response")
-                
+
             except requests.exceptions.Timeout:
                 logger.error("LLM request timed out")
                 return None
@@ -87,7 +87,7 @@ class BaseService(ABC):
                 logger.error(f"Unexpected error in LLM request: {str(e)}")
                 logger.exception("Full traceback:")
                 return None
-        
+
     def get_transfer_value(self, tx: Dict) -> float:
         """
         Extracts a 'direct' value (ETH or ERC-20) from a single transfer.
@@ -142,7 +142,7 @@ class BaseService(ABC):
                     decimals = erc20.get('decimals', 18)
                     if raw_val and raw_val.isdigit():
                         return float(raw_val) / (10 ** int(decimals))
-            
+
             # 5. external transfer's ETH value
             if tx.get('category') == 'external' and tx.get('asset') == 'ETH':
                 raw_val = tx.get('value')
@@ -160,9 +160,9 @@ class BaseService(ABC):
             print(f"Error extracting value from tx: {str(e)}, tx data: {json.dumps(tx)[:200]}...")
             return 0.0
 
-    def fetch_all_transfers(self, 
-                          params: Dict[str, Any], 
-                          endpoint: str, 
+    def fetch_all_transfers(self,
+                          params: Dict[str, Any],
+                          endpoint: str,
                           headers: Dict[str, str],
                           max_txs: int = 1000) -> List[Dict[str, Any]]:
         """

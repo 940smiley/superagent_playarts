@@ -2502,3 +2502,4 @@ export const contractABI = [
     type: "receive",
   },
 ];
+

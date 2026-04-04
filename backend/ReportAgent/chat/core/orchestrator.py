@@ -1,7 +1,7 @@
 # command_orchestrator.py
 from typing import Dict, Any, Optional
 import logging
-from .command_types import CommandType 
+from .command_types import CommandType
 from ..services.wallet_service import WalletService
 from ..services.nft_service import NFTService
 from ..services.llm_service import LLMService
@@ -14,7 +14,7 @@ class CommandOrchestrator:
     """
     Orchestrates command processing and service interactions
     """
-    
+
     def __init__(self):
         self.wallet_service = WalletService()
         self.nft_service = NFTService()
@@ -29,12 +29,12 @@ class CommandOrchestrator:
             params = intent["params"]
             logger.info(f"Detected command type: {command_type}")
             logger.debug(f"Parameters: {params}")
-            
+
             # If command type is "unknown", send directly to LLM
             if command_type == "unknown":
                 logger.info("Command type is unknown, forwarding directly to LLM")
                 return self._handle_direct_llm_query(user_input)
-                
+
             return self._route_command(command_type, params)
         except Exception as e:
             logger.error(f"Error in process_input: {str(e)}", exc_info=True)
@@ -46,15 +46,15 @@ class CommandOrchestrator:
         """
         try:
             logger.info(f"Sending direct query to LLM: {user_input[:50]}...")
-            
+
             # Generate a response through the LLM service
             response = self.llm_service.generate_llm_response(user_input)
-            
+
             if not response:
                 return "I'm sorry, I couldn't generate a response to your question. Please try again."
-                
+
             return response
-            
+
         except Exception as e:
             logger.error(f"Error in direct LLM query: {str(e)}", exc_info=True)
             return f"An error occurred while generating a response: {str(e)}"
@@ -93,7 +93,7 @@ class CommandOrchestrator:
         Returns a single form that asks for:
         - Character Name (once)
         - Wallet Address
-        Then a 'Search NFTs' button, 
+        Then a 'Search NFTs' button,
         Once NFTs are fetched, show a <select> to pick one,
         and a 'Start Training' button to submit.
         """
@@ -175,7 +175,7 @@ class CommandOrchestrator:
         try:
             # Replace api-ai-alpha.playarts.ai with localhost:5001
             internal_uri = uri.replace('https://api-ai-alpha.playarts.ai', 'http://localhost:5001')
-            
+
             response = requests.get(internal_uri, timeout=10)
             response.raise_for_status()
             return response.json()
@@ -189,15 +189,15 @@ class CommandOrchestrator:
         """
         if not nfts:
             return "No NFT metadata available"
-            
+
         response_parts = ["### NFT Analysis Results\n"]
-        
+
         for nft in nfts:
             # Fetch metadata from tokenURI
             metadata = {}
             if token_uri := nft.get('token_uri'):
                 metadata = self._fetch_nft_metadata_from_uri(token_uri)
-            
+
             # Combine fetched metadata with existing NFT data
             nft_data = {
                 'name': metadata.get('name', 'Unnamed NFT'),
@@ -208,7 +208,7 @@ class CommandOrchestrator:
                 'attributes': metadata.get('attributes', []),
                 'image_url': metadata.get('image', 'N/A')
             }
-            
+
             response_parts.extend([
                 f"#### {nft_data['name']}",
                 f"- Contract: {nft_data['contract_address']}",
@@ -219,12 +219,12 @@ class CommandOrchestrator:
                 "",
                 "**Attributes:**"
             ])
-            
+
             for attr in nft_data['attributes']:
                 response_parts.append(f"- {attr.get('trait_type', 'N/A')}: {attr.get('value', 'N/A')}")
-            
+
             response_parts.append("\n---\n")
-            
+
         return "\n".join(response_parts)
 
 
@@ -358,15 +358,15 @@ class CommandOrchestrator:
         """
         try:
             address = params.get("address")
-            
+
             if address:
                 # Wallet-specific NFT analysis
                 network = params.get("network", "arbitrum")
                 nft_response = self.nft_service.get_nfts(address, network)
-                
+
                 if nft_response["status"] == "error":
                     return f"Error fetching NFTs: {nft_response['message']}"
-                    
+
                 if nft_response["status"] == "success":
                     nfts = nft_response["data"]["nfts"]
                     if not nfts:
@@ -375,7 +375,7 @@ class CommandOrchestrator:
             else:
                 # General market analysis
                 return self.nft_service.process_nft_analysis()
-                
+
         except Exception as e:
             logger.error(f"Error in NFT analysis: {str(e)}", exc_info=True)
             return f"Error analyzing NFTs: {str(e)}"

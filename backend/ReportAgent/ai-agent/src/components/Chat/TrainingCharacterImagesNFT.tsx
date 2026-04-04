@@ -394,3 +394,4 @@ View on the explorer: https://aeneid.explorer.story.foundation/ipa/${ipId}`;
     </div>
   );
 }
+

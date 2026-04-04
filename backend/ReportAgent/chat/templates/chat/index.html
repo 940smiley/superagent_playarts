@@ -13,7 +13,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0; 
+            margin: 0;
             padding: 20px;
             background-color: #f5f5f5;
         }
@@ -63,8 +63,8 @@
 
         /* 입력창, 버튼 */
         .input-container {
-            display: flex; 
-            gap: 10px; 
+            display: flex;
+            gap: 10px;
             padding: 10px;
         }
         #message-input {
@@ -75,11 +75,11 @@
             font-size: 16px;
         }
         button {
-            padding: 10px 20px; 
-            background-color: #007bff; 
+            padding: 10px 20px;
+            background-color: #007bff;
             color: white;
-            border: none; 
-            border-radius: 5px; 
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.2s;
         }
@@ -92,18 +92,18 @@
 
         /* PDF 다운로드 버튼 */
         .pdf-download-btn {
-            position: absolute; 
-            top: 50%; 
-            right: 10px; 
+            position: absolute;
+            top: 50%;
+            right: 10px;
             transform: translateY(-50%);
-            background-color: #28a745; 
-            color: #fff; 
+            background-color: #28a745;
+            color: #fff;
             font-size: 13px;
-            padding: 6px 12px; 
-            border-radius: 4px; 
-            border: none; 
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: none;
             cursor: pointer;
-            white-space: nowrap; 
+            white-space: nowrap;
             z-index: 1;
         }
         .pdf-download-btn:hover {
@@ -112,26 +112,26 @@
 
         /* 트레이닝 진행도 */
         .training-progress {
-            margin-top: 10px; 
-            padding: 10px; 
-            background-color: #e9ecef; 
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
             border-radius: 5px;
         }
         .progress {
-            height: 20px; 
-            margin-top: 5px; 
-            background-color: #e9ecef; 
+            height: 20px;
+            margin-top: 5px;
+            background-color: #e9ecef;
             border-radius: 0.25rem;
         }
         .progress-bar {
-            background-color: #007bff; 
-            height: 100%; 
-            border-radius: 0.25rem; 
+            background-color: #007bff;
+            height: 100%;
+            border-radius: 0.25rem;
             transition: width 0.6s ease;
         }
-        #progress-container { 
-            display: none; 
-            margin-bottom: 15px; 
+        #progress-container {
+            display: none;
+            margin-bottom: 15px;
         }
 
         /* code, table 등 */
@@ -191,7 +191,7 @@
         <div id="progress-container" class="training-progress">
             <h4 id="progress-title"></h4>
             <div class="progress">
-                <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" 
+                <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;"
                      aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
             </div>
         </div>
@@ -218,7 +218,7 @@
                     <input type="text" id="walletAddress" placeholder="0x1234..." required>
                     <button type="button" id="nftSearchButton" class="btn btn-secondary">Search NFTs</button>
                 </div>
-                
+
                 <!-- NFT 갤러리 표시 영역 -->
                 <div id="nftGallery"></div>
 
@@ -314,7 +314,7 @@
                     body: JSON.stringify({ address })
                 });
                 const data = await response.json();
-                
+
                 console.log("Fetched NFT Data:", data);
 
                 const nftGallery = document.getElementById('nftGallery');
@@ -373,7 +373,7 @@
          ********************************************************************/
         async function handleNftTrainingSubmit(e) {
             e.preventDefault();
-            
+
             const characterName = document.getElementById('characterName')?.value.trim();
             if (!characterName) {
                 alert('Please enter a character name');
@@ -404,7 +404,7 @@
                     imageBlob = await imageResponse.blob();
                 } else {
                     // placeholder
-                    imageBlob = new Blob([""], { type: 'image/png' }); 
+                    imageBlob = new Blob([""], { type: 'image/png' });
                 }
 
                 const formData = new FormData();
@@ -440,10 +440,10 @@
          ********************************************************************/
         async function handleImageUploadSubmit(e) {
             e.preventDefault();
-            
+
             const characterName = document.getElementById('characterName')?.value.trim();
             const imageFile = document.getElementById('characterImage')?.files[0];
-            
+
             if (!characterName || !imageFile) {
                 alert('Please make sure both character name and image file are provided');
                 return;

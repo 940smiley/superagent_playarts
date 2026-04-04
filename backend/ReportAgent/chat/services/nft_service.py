@@ -43,7 +43,7 @@ class NFTService(BaseService):
 
         # Arbitrum 네트워크로 Web3 초기화
         self.web3 = Web3(Web3.HTTPProvider(self.network_rpcs['arbitrum']))
-        
+
         # 체인 ID 확인 (Arbitrum은 42161)
         try:
             chain_id = self.web3.eth.chain_id
@@ -246,13 +246,13 @@ class NFTService(BaseService):
                 function_signature = "tokenURI(uint256)"
                 function_selector = self.web3.keccak(text=function_signature)[:4]
                 padded_token_id = decimal_token_id.to_bytes(32, 'big')
-                
+
                 result = self.web3.eth.call({
                     'to': Web3.to_checksum_address(contract_address),
                     'data': function_selector + padded_token_id,
                     'gas': 2000000  # 가스 리미트 증가
                 })
-                
+
                 if len(result) > 0:
                     # 결과가 있으면 디코딩 시도
                     decoded = self.web3.codec.decode(['string'], result)
@@ -260,7 +260,7 @@ class NFTService(BaseService):
                         token_uri = decoded[0].strip('\x00')
                         print(f"Successfully retrieved token URI via low-level call: {token_uri}")
                         return {"token_uri": token_uri, "token_id": token_id}
-                
+
             except Exception as e:
                 print(f"Low-level call failed: {str(e)}")
 
@@ -271,7 +271,7 @@ class NFTService(BaseService):
                 })
                 print(f"Successfully retrieved token URI via contract call: {token_uri}")
                 return {"token_uri": token_uri, "token_id": token_id}
-                
+
             except Exception as e:
                 print(f"Contract call failed: {str(e)}")
 
@@ -280,7 +280,7 @@ class NFTService(BaseService):
         except Exception as e:
             print(f"Error in _fetch_token_metadata: {str(e)}")
             traceback.print_exc()
-            return {}        
+            return {}
 
     def _fetch_nfts_optimized(self, address: str, network: str) -> List[Dict[str, Any]]:
         """
@@ -295,10 +295,10 @@ class NFTService(BaseService):
                 "pageSize": 100,
                 "contractAddresses[]": ["0xcf3380edacfacc4503dae0906f5c021e39dbfe2d"]
             }
-            
+
             print(f"Fetching NFTs for address: {address}")
             response = requests.get(url, params=params, headers={"Accept": "application/json"}, timeout=30)
-            
+
             if response.status_code != 200:
                 print(f"Alchemy API Error: {response.status_code}")
                 print(response.text)
@@ -307,25 +307,25 @@ class NFTService(BaseService):
             result = response.json()
             owned_nfts = result.get("ownedNfts", [])
             print(f"Found {len(owned_nfts)} NFTs from Alchemy")
-            
+
             nfts = []
             for nft in owned_nfts:
                 try:
                     contract_addr = nft.get("contract", {}).get("address")
                     token_id = nft.get("id", {}).get("tokenId")
-                    
+
                     if not (contract_addr and token_id):
                         continue
-                    
+
                     print(f"\nProcessing NFT: Contract={contract_addr}, TokenID={token_id}")
-                    
+
                     # Try to fetch on-chain metadata first
                     metadata = self._fetch_token_metadata(contract_addr, token_id)
-                    
+
                     if not metadata:
                         print("Falling back to Alchemy metadata")
                         metadata = nft.get("metadata", {})
-                        
+
                     if metadata:
                         nft_info = {
                             "contract_address": contract_addr,
@@ -340,13 +340,13 @@ class NFTService(BaseService):
                         print(f"Successfully processed NFT {token_id}")
                     else:
                         print(f"No metadata available for token {token_id}")
-                        
+
                 except Exception as e:
                     print(f"Error processing NFT {token_id}: {str(e)}")
                     continue
-                    
+
             return nfts
-            
+
         except Exception as e:
             print(f"Error in _fetch_nfts_optimized: {str(e)}")
             return []
@@ -419,11 +419,11 @@ class NFTService(BaseService):
             print("Starting NFT market analysis...")
             # 하드코딩된 Alchemy URL 사용 (fetch_nfts_optimized와 일치시킴)
             alchemy_url = "https://eth-mainnet.g.alchemy.com/v2/6WEw2FPscS1i94eKq18ok9AE3hd-xA_5"
-            
+
             current_block = self.web3.eth.block_number
             blocks_in_period = days * 24 * 60 * 60 // 12
             from_block = hex(current_block - blocks_in_period)
-        
+
             # Major marketplace addresses
             MARKETPLACES = {
                 "0x00000000006c3852cbef3e08e8df289169ede581": "OpenSea (Seaport 1.1)",
@@ -831,14 +831,14 @@ Keep the analysis fact-based and avoid speculation."""
             response.raise_for_status()
             metadata = response.json()
             logger.info(f"Metadata response: {json.dumps(metadata, indent=2)}")
-            
+
             # JSON에서 이미지 URL 가져오기
             image_url = metadata.get("image")
             if not image_url:
                 image_url = metadata.get("image_url")
             if not image_url:
                 image_url = metadata.get("animation_url")
-            
+
             logger.info(f"Final image URL: {image_url}")
             return image_url
         except requests.RequestException as e:

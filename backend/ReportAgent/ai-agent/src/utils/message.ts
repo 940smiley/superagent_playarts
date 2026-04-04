@@ -55,3 +55,4 @@ export const extractImageUrl = (content: string) => {
   const match = content.match(regex);
   return match ? match[1] : null;
 };
+

@@ -132,12 +132,12 @@ export default function TwitToTakoyanAi({
 
       const ipList = await getLicenseTokenListFromIpAsset(ipId);
       const hasLicenseToken = ipList?.data?.find((x) => x.owner === address);
-      
+
       if (!hasLicenseToken) {
         // 토큰 없으면?
         console.log("라이선스 토큰이 없습니다. 구매 화면으로 이동합니다.");
         setButtonStatus("");
-        
+
         if (ipId && licenseTermsId && addLoadingMessage && replaceLoadingWithComponent) {
           // 메시지 UI에서 현재 로딩 제거 및 구매 화면으로 전환
           addLoadingMessage();
@@ -149,7 +149,7 @@ export default function TwitToTakoyanAi({
         }
         return;
       }
-      
+
       // 라이선스 토큰이 있으면 트윗 진행
       const regex = /\/agent\/([0-9a-f-]+)\/inference/;
       const match = agentUrl.match(regex);
@@ -157,7 +157,7 @@ export default function TwitToTakoyanAi({
       if (match && match[1]) {
         agentKey = match[1];
       }
-      
+
       const result = await twitToTakoyanAi(agentKey, selectFilter, twitMessage, twitterHandle);
       if (result.response) {
         const twitterUrl = `[View on Twitter](${result.twitterUrl})`;
@@ -169,7 +169,7 @@ export default function TwitToTakoyanAi({
     } catch (error) {
       console.error(error);
       setButtonStatus("");
-      
+
       // 에러 메시지 표시
       typeMessage("트윗 생성 중 오류가 발생했습니다. 다시 시도해 주세요.", setMessages, setIsAITyping);
     }

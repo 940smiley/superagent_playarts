@@ -64,3 +64,4 @@ export const aiAgentOptions: AiAgentOptionType[] = [
     title: "Edit character's outfit",
   },
 ];
+

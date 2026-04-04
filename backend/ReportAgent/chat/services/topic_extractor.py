@@ -45,3 +45,4 @@ class TopicExtractor:
             short_topic = "noTopic"
 
         return full_caption, short_topic
+

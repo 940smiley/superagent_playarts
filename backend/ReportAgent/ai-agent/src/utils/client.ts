@@ -12,3 +12,4 @@ export async function setupStoryClient(
   };
   return StoryClient.newClient(config);
 }
+

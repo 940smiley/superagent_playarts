@@ -17,14 +17,14 @@ interface OutfitEditorProps {
   addLoadingMessage?: () => void;
 }
 
-const OutfitEditor: React.FC<OutfitEditorProps> = ({ 
-  setMessages, 
+const OutfitEditor: React.FC<OutfitEditorProps> = ({
+  setMessages,
   setIsAITyping,
   addLoadingMessage
 }) => {
   // Get Story Client for IPA/NFT operations
   const { client } = useStoryClient();
-  
+
   // 고유 ID 생성
   const uniqueId = useId();
   const inputId = `image-upload-${uniqueId}`;
@@ -38,7 +38,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [brushCoordinates, setBrushCoordinates] = useState<Coordinate[]>([]);
   const [isPainting, setIsPainting] = useState<boolean>(false);
-  
+
   // Advanced settings
   const [steps, setSteps] = useState<number>(25);
   const [guidance, setGuidance] = useState<number>(10);
@@ -47,18 +47,18 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
   const [smoothMask, setSmoothMask] = useState<boolean>(false);
   const [morphOperation, setMorphOperation] = useState<string>("close");
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
-  
+
   const [error, setError] = useState<string | null>(null);
-  
+
   // References
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const maskCanvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
-  
+
   // Gradio API endpoint
   const API_DOMAIN = 'https://d8b82e35a2ac6cc83a.gradio.live/';
   const API_URL = `${API_DOMAIN}api/predict`;
-  
+
   // Check server on component mount
   useEffect(() => {
     const checkServer = async () => {
@@ -72,15 +72,15 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
         setError('Unable to connect to the Gradio server. Please make sure it is running.');
       }
     };
-    
+
     checkServer();
   }, []);
-  
+
   // Handle image upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const dataUrl = event.target?.result as string;
@@ -88,13 +88,13 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
       setResultImage(null);
       setBrushCoordinates([]);
       setError(null);
-      
+
       // Set up canvas after image load
       const img = new Image();
       img.onload = () => {
         if (canvasRef.current && maskCanvasRef.current) {
           imageRef.current = img;
-          
+
           // Original image canvas
           const canvas = canvasRef.current;
           canvas.width = img.width;
@@ -104,7 +104,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, 0, 0);
           }
-          
+
           // Mask canvas
           const maskCanvas = maskCanvasRef.current;
           maskCanvas.width = img.width;
@@ -121,50 +121,50 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
     };
     reader.readAsDataURL(file);
   };
-  
+
   // Draw brush on canvas for the mask
   const drawBrushOnCanvas = (x: number, y: number) => {
     if (!maskCanvasRef.current) return;
-    
+
     const canvas = maskCanvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     // 좌표가 캔버스 범위 내에 있는지 확인
     if (x < 0 || y < 0 || x > canvas.width || y > canvas.height) return;
-    
+
     // Draw white area for mask
     ctx.beginPath();
     ctx.globalAlpha = 1.0; // 완전 불투명하게 설정
     ctx.fillStyle = 'white';
     ctx.arc(x, y, brushSize, 0, Math.PI * 2);
     ctx.fill();
-    
+
     // Save brush coordinates
     setBrushCoordinates(prev => [...prev, { x, y, size: brushSize }]);
-    
+
     // Overlay the mask on top of the original image
     updateOverlay();
   };
-  
+
   // Update the overlay
   const updateOverlay = () => {
     if (!canvasRef.current || !maskCanvasRef.current || !imageRef.current) return;
-    
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     // Redraw the original image
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(imageRef.current, 0, 0);
-    
+
     // Draw the mask overlay with semi-transparent red
     ctx.save();
     ctx.globalAlpha = 0.4; // 투명도 조정
     ctx.globalCompositeOperation = 'source-atop'; // 마스크가 이미지 위에만 적용되도록
     ctx.fillStyle = 'rgba(241, 238, 238, 0.5)';
-    
+
     // 마스크 캔버스의 내용을 가져와서 마스크 영역만 빨간색으로 표시
     const maskCanvas = maskCanvasRef.current;
     const maskCtx = maskCanvas.getContext('2d', { willReadFrequently: true });
@@ -174,7 +174,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
       tempCanvas.width = maskCanvas.width;
       tempCanvas.height = maskCanvas.height;
       const tempCtx = tempCanvas.getContext('2d');
-      
+
       if (tempCtx) {
         // 마스크 데이터를 빨간색으로 변환
         const imgData = tempCtx.createImageData(maskCanvas.width, maskCanvas.height);
@@ -190,13 +190,13 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
         ctx.drawImage(tempCanvas, 0, 0);
       }
     }
-    
+
     ctx.restore();
   };
-  
+
   // 캔버스 크기 조정 및 관리
   const [canvasScale, setCanvasScale] = useState(1);
-  
+
   // 이미지 로드 후 캔버스 스케일 계산
   useEffect(() => {
     if (canvasRef.current && imageRef.current && originalImage) {
@@ -208,56 +208,56 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
       }
     }
   }, [originalImage]);
-  
+
   // Mouse event handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsPainting(true);
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const rect = canvas.getBoundingClientRect();
     // 실제 캔버스 크기와 표시되는 크기의 비율 계산
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    
+
     // 실제 캔버스 내 좌표 계산
     const x = (e.clientX - rect.left) * scaleX;
     const y = (e.clientY - rect.top) * scaleY;
-    
+
     drawBrushOnCanvas(x, y);
   };
-  
+
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isPainting || !canvasRef.current) return;
-    
+
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     // 실제 캔버스 크기와 표시되는 크기의 비율 계산
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    
+
     // 실제 캔버스 내 좌표 계산
     const x = (e.clientX - rect.left) * scaleX;
     const y = (e.clientY - rect.top) * scaleY;
-    
+
     drawBrushOnCanvas(x, y);
   };
-  
+
   const handleMouseUp = () => {
     setIsPainting(false);
   };
-  
+
   // Clear mask
   const clearMask = () => {
     if (!maskCanvasRef.current || !canvasRef.current || !imageRef.current) return;
-    
+
     const maskCanvas = maskCanvasRef.current;
     const maskCtx = maskCanvas.getContext('2d');
     if (!maskCtx) return;
-    
+
     // Clear the mask canvas
     maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-    
+
     // Redraw the original image
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -265,33 +265,33 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(imageRef.current, 0, 0);
     }
-    
+
     setBrushCoordinates([]);
   };
-  
+
   // Run inpainting
   const handleProcessImage = async () => {
     if (!originalImage || !maskCanvasRef.current) {
       setError('You need both image and mask.');
       return;
     }
-    
+
     if (brushCoordinates.length === 0) {
       setError('Please select the area you want to edit.');
       return;
     }
-    
+
     setIsProcessing(true);
     setError(null);
-    
+
     try {
       // Convert the original image to data URL
       const inputImage = originalImage;
-      
+
       // Get the mask image from the mask canvas
       const maskCanvas = maskCanvasRef.current;
       const maskDataUrl = maskCanvas.toDataURL('image/png');
-      
+
       // Send data to the Gradio API
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -315,13 +315,13 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
           ]
         })
       });
-      
+
       if (!response.ok) {
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
-      
+
       const result = await response.json();
-      
+
       // Process API response
       if (result.data) {
         setResultImage(result.data);
@@ -335,19 +335,19 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
       setIsProcessing(false);
     }
   };
-  
+
   // Continue editing with the result image
   const continueEditingWithResult = () => {
     if (!resultImage) return;
-    
+
     setOriginalImage(resultImage);
     setResultImage(null);
-    
+
     // Re-initialize canvas with the new image
     const img = new Image();
     img.onload = () => {
       imageRef.current = img;
-      
+
       if (canvasRef.current && maskCanvasRef.current) {
         // Original image canvas
         const canvas = canvasRef.current;
@@ -358,7 +358,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(img, 0, 0);
         }
-        
+
         // Mask canvas
         const maskCanvas = maskCanvasRef.current;
         maskCanvas.width = img.width;
@@ -367,14 +367,14 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
         if (maskCtx) {
           maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
         }
-        
+
         // 스케일 조정 필요 없음 - useEffect에서 자동으로 처리
         setBrushCoordinates([]);
       }
     };
     img.src = resultImage;
   };
-  
+
   // Generate random seed
   const generateRandomSeed = () => {
     setSeed(Math.floor(Math.random() * 1000000));
@@ -383,12 +383,12 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
   // Handle mint as NFT - super simplified version
   const handleMintAsNFT = async () => {
     console.log("Mint as NFT button clicked", {resultImage, client});
-    
+
     if (!resultImage || !client) {
       alert("Missing result image or client");
       return;
     }
-    
+
     try {
       // Just directly call the mintAndRegisterIpa function
       alert("Starting NFT minting process...");
@@ -400,20 +400,20 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
       alert(`Error: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
-  
+
   // Handle mint as IPA - super simplified version
   const handleMintAsIPA = async () => {
     console.log("Register as IPA button clicked", {resultImage, client});
-    
+
     if (!resultImage || !client) {
       alert("Missing result image or client");
       return;
     }
-    
+
     try {
       // Get character name
       const characterName = 'Anime Character';
-      
+
       // Just directly call the mintAndRegisterIpa function with agent flag
       alert("Starting IPA registration process...");
       const result = await mintAndRegisterIpa(
@@ -428,17 +428,17 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
       alert(`Error: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
-  
+
   return (
     <div className={styles.outfitEditor}>
       <div className={styles.header}>
         <h2>Anime Outfit Editor</h2>
         <p>Outfit editing using SAM + Stable Diffusion Inpainting</p>
       </div>
-      
+
       <div className={styles.content}>
         {error && <div className={styles.errorMessage}>{error}</div>}
-        
+
         <section className={styles.uploadSection}>
           <input
             type="file"
@@ -452,11 +452,11 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
             Upload Character Image
           </label>
         </section>
-        
+
         {originalImage && (
           <section className={styles.editorSection}>
             <div className={styles.canvasContainer}>
-              <div 
+              <div
                 className={styles.canvasWrapper}
                 style={{
                   width: '100%',
@@ -471,8 +471,8 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
                   onMouseLeave={handleMouseUp}
                   className={styles.canvas}
                 />
-                <canvas 
-                  ref={maskCanvasRef} 
+                <canvas
+                  ref={maskCanvasRef}
                   className={styles.maskCanvas}
                 />
               </div>
@@ -494,7 +494,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
                 </button>
               </div>
             </div>
-            
+
             <div className={styles.promptSection}>
               <div className={styles.controlGroup}>
                 <label>Prompt:</label>
@@ -506,7 +506,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
                   className={styles.textInput}
                 />
               </div>
-              
+
               <div className={styles.controlGroup}>
                 <label>Negative Prompt:</label>
                 <input
@@ -517,16 +517,16 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
                   className={styles.textInput}
                 />
               </div>
-              
+
               <div className={styles.advancedToggle}>
-                <button 
+                <button
                   onClick={() => setShowAdvanced(!showAdvanced)}
                   className={styles.toggleButton}
                 >
                   {showAdvanced ? 'Hide Advanced Settings ▲' : 'Show Advanced Settings ▼'}
                 </button>
               </div>
-              
+
               {showAdvanced && (
                 <div className={styles.advancedSettings}>
                   <div className={styles.settingsGrid}>
@@ -541,7 +541,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
                         className={styles.numberInput}
                       />
                     </div>
-                    
+
                     <div className={styles.controlGroup}>
                       <label>Guidance Scale:</label>
                       <input
@@ -554,7 +554,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
                         className={styles.numberInput}
                       />
                     </div>
-                    
+
                     <div className={styles.controlGroup}>
                       <label>Seed:</label>
                       <div className={styles.seedControl}>
@@ -569,7 +569,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
                         </button>
                       </div>
                     </div>
-                    
+
                     <div className={`${styles.controlGroup} ${styles.checkbox}`}>
                       <label>
                         <input
@@ -580,7 +580,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
                         Use AnimeSeg
                       </label>
                     </div>
-                    
+
                     <div className={`${styles.controlGroup} ${styles.checkbox}`}>
                       <label>
                         <input
@@ -591,7 +591,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
                         Smooth mask edges
                       </label>
                     </div>
-                    
+
                     <div className={styles.controlGroup}>
                       <label>Mask Morphology:</label>
                       <select
@@ -609,7 +609,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
                   </div>
                 </div>
               )}
-              
+
               <button
                 onClick={handleProcessImage}
                 disabled={isProcessing || brushCoordinates.length === 0}
@@ -619,13 +619,13 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
                 {isProcessing ? 'Processing...' : 'Apply Outfit Change'}
               </button>
             </div>
-            
+
             {resultImage && (
               <div className={styles.resultSection}>
                 <h3>Result Image</h3>
                 <div className={styles.resultImageContainer}>
                   <img src={resultImage} alt="Processed result" />
-                  
+
                   {/* NFT/IPA suggestion banner */}
                   <div className={styles.nftSuggestion}>
                     <p>Love your new outfit design? Make it permanent!</p>
@@ -650,7 +650,7 @@ const OutfitEditor: React.FC<OutfitEditorProps> = ({
             )}
           </section>
         )}
-        
+
         {!originalImage && (
           <div className={styles.startInstruction}>
             <p>Upload an image to get started</p>

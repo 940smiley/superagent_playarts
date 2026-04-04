@@ -18,3 +18,4 @@ interface MessageWithLoading extends Message {
   isLoading?: boolean;
   component?: JSX.Element;
 }
+

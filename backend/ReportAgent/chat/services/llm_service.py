@@ -34,10 +34,10 @@ class LLMService(BaseService):
     def parse_intent(self, user_input: str) -> Dict[str, Any]:
         """
         Parse user input to determine command type and parameters
-        
+
         Args:
             user_input: Raw user input string
-            
+
         Returns:
             Dictionary containing command type and parameters
         """
@@ -53,7 +53,7 @@ class LLMService(BaseService):
                 self._check_wallet_intent(lower_input, user_input) or
                 self._get_unknown_intent()
             )
-            
+
             logger.debug(f"Detected intent: {intent}")
             return intent
 
@@ -64,25 +64,25 @@ class LLMService(BaseService):
     def get_image_filters(self, prompt: str) -> List[str]:
         """
         Get recommended style filters for image generation
-        
+
         Args:
             prompt: User's image generation prompt
-            
+
         Returns:
             List of applicable style filters
         """
         try:
             filter_prompt = self._create_filter_prompt(prompt)
             response = self.generate_llm_response(filter_prompt)
-            
+
             if not response:
                 return []
-                
+
             selected_filter = response.strip().lower()
             mapped_filter = self.FILTER_MAPPING.get(selected_filter)
-            
+
             return [mapped_filter] if mapped_filter else []
-            
+
         except Exception as e:
             logger.error(f"Error getting image filters: {str(e)}", exc_info=True)
             return []
@@ -112,15 +112,15 @@ class LLMService(BaseService):
     def _check_image_generation_intent(self, lower_input: str, original_input: str) -> Optional[Dict[str, Any]]:
         """Check for image generation intent"""
         image_keywords = ['generate image', 'create image', 'make image', 'draw']
-        
+
         if any(keyword in lower_input for keyword in image_keywords):
             prompt = self._extract_generation_prompt(lower_input, image_keywords)
             selected_filters = self.get_image_filters(prompt)
-            
+
             filter_params = {
                 filter_name: False for filter_name in self.FILTER_MAPPING.values()
             }
-            
+
             for filter_name in selected_filters:
                 if filter_name:
                     filter_params[filter_name] = True
@@ -139,7 +139,7 @@ class LLMService(BaseService):
     def _check_nft_intent(self, lower_input: str, original_input: str) -> Optional[Dict[str, Any]]:
         """Check for NFT analysis intent"""
         nft_keywords = ['nft', 'collection', 'show my nft', 'get nft', 'view nft']
-        
+
         if any(keyword in lower_input for keyword in nft_keywords):
             address = self._extract_eth_address(original_input)
             return {
@@ -154,7 +154,7 @@ class LLMService(BaseService):
     def _check_wallet_intent(self, lower_input: str, original_input: str) -> Optional[Dict[str, Any]]:
         """Check for wallet analysis intent"""
         address = self._extract_eth_address(original_input)
-        
+
         if address:
             return {
                 "command_type": "wallet_analysis",
@@ -170,7 +170,7 @@ class LLMService(BaseService):
             for keyword in ['character', 'lora']:
                 if keyword in words:
                     char_index = max(char_index, words.index(keyword) + 1)
-            
+
             if char_index >= 0 and char_index < len(words):
                 return words[char_index]
             return ""
@@ -193,7 +193,7 @@ class LLMService(BaseService):
 
     def _create_filter_prompt(self, prompt: str) -> str:
         """Create prompt for style filter selection"""
-        return f"""Given this image generation request, which art style filter should be applied? 
+        return f"""Given this image generation request, which art style filter should be applied?
 Choose ONLY ONE filter from the following list that best matches the request's intent:
 {', '.join(self.FILTER_MAPPING.keys())}
 

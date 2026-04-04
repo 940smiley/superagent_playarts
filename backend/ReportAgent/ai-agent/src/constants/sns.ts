@@ -26,3 +26,4 @@ export const snsLinks: SnsType[] = [
     icon: MediumIcon,
   },
 ];
+

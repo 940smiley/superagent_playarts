@@ -64,3 +64,4 @@ export const imageFilters = [
     imageUrl: "/images/filter/ippy.png",
   },
 ];
+

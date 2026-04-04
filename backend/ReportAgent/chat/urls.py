@@ -4,13 +4,13 @@ from django.conf.urls.static import static
 
 from .views import (
     # 기존 뷰
-    chat_view, 
-    send_message, 
-    upload_training_image, 
+    chat_view,
+    send_message,
+    upload_training_image,
     check_training_status,
     fetch_nfts,
     twit_view,
-    
+
     # 에이전트 뷰 (views.py 파일에 추가된 새 함수들)
     agent_inference,
     model_inference,
@@ -27,7 +27,7 @@ urlpatterns = [
     path('api/upload_training_image/', upload_training_image, name='upload_training_image'),
     path('api/check_training_status/', check_training_status, name='check_training_status'),
     path('api/fetch_nfts/', fetch_nfts, name='fetch_nfts'),
-    
+
     # Agent API endpoints
     path('agent/<uuid:agent_key>/inference', agent_inference, name='agent_inference'),
     path('model/<str:model_name>/inference', model_inference, name='model_inference'),

@@ -8,20 +8,20 @@ logger = logging.getLogger(__name__)
 
 class GPUManager:
     _instance = None
-    
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.initialize()
         return cls._instance
-    
+
     def initialize(self):
         """초기화 로직"""
         self.available_gpus = [0, 4, 7]  # 사용 가능한 GPU IDs
         self.gpu_locks = {gpu: Lock() for gpu in self.available_gpus}
         self.training_queue = Queue()
         self.active_trainings = {}  # gpu_id: job_id mapping
-        
+
         # 서버 재시작 시 이전 작업 상태 복구
         self._recover_previous_state()
 
@@ -36,13 +36,13 @@ class GPUManager:
                 job.gpu_id = None
                 job.save()
                 self.add_to_queue(job.id)
-            
+
             # queued 상태의 작업들을 큐에 다시 추가
             queued_jobs = TrainingJob.objects.filter(status='queued')
             for job in queued_jobs:
                 if job.id not in self.training_queue.queue:
                     self.add_to_queue(job.id)
-                    
+
         except Exception as e:
             logger.error(f"Error recovering previous state: {str(e)}")
 
@@ -109,7 +109,7 @@ class GPUManager:
         queue_size = self.training_queue.qsize()
         active_count = len(self.active_trainings)
         available_count = len(self.available_gpus) - active_count
-        
+
         # 활성 작업 정보 수집
         active_jobs = []
         for gpu_id, job_id in self.active_trainings.items():
@@ -123,7 +123,7 @@ class GPUManager:
                 })
             except TrainingJob.DoesNotExist:
                 continue
-        
+
         return {
             'queue_size': queue_size,
             'active_trainings': active_jobs,
@@ -135,7 +135,7 @@ class GPUManager:
         """큐의 모든 작업 위치 업데이트"""
         # 큐에 있는 작업 ID 목록 가져오기
         queue_items = list(self.training_queue.queue)
-        
+
         # 각 작업의 위치 업데이트
         for position, job_id in enumerate(queue_items, 1):
             try:

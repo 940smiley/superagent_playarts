@@ -13,3 +13,4 @@ export function truncateText(
 
   return text.slice(0, front) + placeholder + text.slice(-back);
 }
+

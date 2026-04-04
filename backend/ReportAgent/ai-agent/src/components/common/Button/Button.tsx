@@ -81,14 +81,15 @@ export function Button({
     <Button className="rainbow" content="Rainbow Button" />
 
     // 이벤트 핸들러
-    <Button 
-    content="Click Handler" 
+    <Button
+    content="Click Handler"
     onClick={() => console.log('clicked')}
     />
 
     // 인라인 스타일
-    <Button 
-    content="Styled Button" 
+    <Button
+    content="Styled Button"
     style={{ width: '200px' }}
     />
  */
+

@@ -14,3 +14,4 @@ export async function uploadJSONToIPFS(jsonMetadata: any): Promise<string> {
 export function createMetadataHash(metadata: any): string {
   return createHash("sha256").update(JSON.stringify(metadata)).digest("hex");
 }
+

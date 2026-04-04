@@ -17,3 +17,4 @@ class Command:
     type: CommandType
     params: Dict[str, Any]
     raw_input: str
+

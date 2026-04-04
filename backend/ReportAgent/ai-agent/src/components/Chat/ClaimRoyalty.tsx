@@ -29,29 +29,29 @@ export default function ClaimRoyalty() {
         setIsLoading(true);
         const assetsDataResponse = await fetchAssets();
         console.log("Fetched assets:", assetsDataResponse.data);
-        
+
         if (!address) {
           console.error("User address not available");
           setIsLoading(false);
           return;
         }
-        
+
         console.log("Current user address:", address);
-        
+
         // Filter assets initiated by the current user
         const eligibleAssets = [];
-        
+
         for (const asset of assetsDataResponse.data) {
           try {
             const txHash = asset.transactionHash;
-            
+
             // Fetch transaction details
             const txData = await getTransaction(txHash);
-            
+
             console.log(`Transaction for ${asset.ipId}:`, txData);
-            
+
             // Check if the initiator is the current user
-            if (txData.data && txData.data.initiator && 
+            if (txData.data && txData.data.initiator &&
                 txData.data.initiator === address) {
               console.log(`Asset ${asset.ipId} was initiated by the current user`);
               eligibleAssets.push(asset);
@@ -61,40 +61,40 @@ export default function ClaimRoyalty() {
             console.error(`Error fetching transaction for ${asset.ipId}:`, error);
           }
         }
-        
+
         setTotalCount(eligibleAssets.length);
         console.log("Eligible assets for claiming:", eligibleAssets);
-        
+
         // Claim royalties for eligible assets
         let totalClaimedAmount = 0;
-        
+
         for (const asset of eligibleAssets) {
           setProcessedCount(prev => prev + 1);
           const result = await handleClaimRoyalty(asset.ipId);
-          
+
           if (result.success && result.amount) {
             totalClaimedAmount += parseFloat(result.amount);
           }
         }
-        
+
         // 모든 자산 처리 후 최종 클레임 결과 설정
         setClaimResult({
           claimedTokens: totalClaimedAmount.toString(),
           totalClaimed: eligibleAssets.length
         });
-        
+
         setIsLoading(false);
       } catch (e) {
         console.error("Error in getIpaAssets:", e);
         setIsLoading(false);
-        
+
         // 오류 발생 시 실패 상태 설정
         setClaimResult({
           success: false
         });
       }
     };
-    
+
     if (address) {
       getIpaAssets();
     }
@@ -120,9 +120,9 @@ export default function ClaimRoyalty() {
       if (response.claimedTokens && response.claimedTokens.length > 0) {
         const claimedAmount = formatEther(response.claimedTokens[0].amount);
         console.log(`Royalties claimed:`, response.claimedTokens[0]);
-        return { 
-          success: true, 
-          amount: claimedAmount 
+        return {
+          success: true,
+          amount: claimedAmount
         };
       } else {
         console.log("No tokens claimed");
@@ -137,21 +137,21 @@ export default function ClaimRoyalty() {
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Claim royalty</h1>
-      
+
       {isLoading && (
         <div className="mt-4 p-4 border rounded-lg bg-blue-50">
           <h2 className="text-lg font-semibold mb-2">Processing assets...</h2>
           <p>{ownAssetsCount} assets are found</p>
           <p>{processedCount} / {totalCount} assets checked</p>
           <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-            <div 
-              className="bg-blue-600 h-2.5 rounded-full" 
+            <div
+              className="bg-blue-600 h-2.5 rounded-full"
               style={{ width: `${totalCount ? (processedCount / totalCount) * 100 : 0}%` }}
             ></div>
           </div>
         </div>
       )}
-      
+
       {claimResult.totalClaimed && !isLoading && (
         <div className="mt-4 p-4 border rounded-lg bg-green-50">
           <h2 className="text-lg font-semibold mb-2">{claimResult.claimedTokens !== "0" ? "Claim success!" : "You have nothing to claim yet"}</h2>

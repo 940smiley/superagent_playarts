@@ -57,3 +57,4 @@ config:
       walk_seed: true
       guidance_scale: 0.75
       sample_steps: 10
+

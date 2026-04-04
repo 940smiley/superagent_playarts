@@ -23,3 +23,4 @@ export const defaultLicenseTermData: LicenseTerms = {
   derivativeRevCeiling: 0n,
   uri: "",
 };
+

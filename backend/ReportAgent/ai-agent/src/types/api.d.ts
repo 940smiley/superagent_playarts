@@ -7,7 +7,7 @@ interface UploadTraining {
 }
 
 /*
-Training character images NFT 
+Training character images NFT
 -> Character Name:, NFT Wallet Address
 -> 이미지 서칭
  */
@@ -17,3 +17,4 @@ Training character images NFT
  * imageFile: File
  *
  */
+

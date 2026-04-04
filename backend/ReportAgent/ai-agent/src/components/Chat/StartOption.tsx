@@ -37,3 +37,4 @@ export function StartOption({ setOption }: OptionProps) {
     </div>
   );
 }
+

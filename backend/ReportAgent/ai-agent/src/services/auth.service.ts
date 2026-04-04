@@ -61,3 +61,4 @@ export async function checkEmailVerification(email: string) {
     return { success: false, error: error.message };
   }
 }
+
